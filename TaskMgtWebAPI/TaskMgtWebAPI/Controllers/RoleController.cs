@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TaskMgtWebAPI.DTOS;
 using TaskMgtWebAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaskMgtWebAPI.Controllers
 {
@@ -30,9 +32,49 @@ namespace TaskMgtWebAPI.Controllers
         {
 
         }
+
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRole(int id, RoleDTO roleDTO)
         {
+            //It checks the given Id is exists in the database or not
+            if (id != roleDTO.RoleId)
+            {
+                return BadRequest();
+            }
 
+            RoleTb roleTb = new RoleTb()
+            {
+                RoleId = roleDTO.RoleId,
+                RoleName = roleDTO.RoleName
+            };
+
+            //It makes the role table entity is modified in the context
+            _context.Entry(roleTb).State = EntityState.Modified;
+
+            try
+            {
+                // It saves the changes in the database
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!RoleTbExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+
+        }
+
+        private bool RoleTbExists(int id)
+        {
+            return _context.RoleTb.Any(e => e.RoleId == id);
         }
         public async Task<IActionResult> DeleteRole(int id)
         {
