@@ -53,6 +53,9 @@ namespace TaskMgtWebAPI.Controllers
 
             try
             {
+
+                _logger.LogInformation("Data is updated successfully");
+
                 // It saves the changes in the database
                 await _context.SaveChangesAsync();
             }
