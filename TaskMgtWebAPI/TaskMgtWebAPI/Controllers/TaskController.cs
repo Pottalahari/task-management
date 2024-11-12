@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Correct namespace for EF Core
+using Microsoft.EntityFrameworkCore;
 using TaskMgtWebAPI.DTOS;
 using TaskMgtWebAPI.Models;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 namespace TaskMgtWebAPI.Controllers
@@ -25,10 +24,14 @@ namespace TaskMgtWebAPI.Controllers
         }
 
 
+        /// <summary>
+        /// Retrieves all tasks from the TaskTb table.
+        /// </summary>
+        /// <returns>A list of all tasks.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskTb>>> GetTasks()
         {
-            _logger.LogInformation("");
+            _logger.LogInformation("Fetching all tasks from the database");
 
             try
             {
@@ -46,9 +49,12 @@ namespace TaskMgtWebAPI.Controllers
 
         }
 
-
+        /// <summary>
+        /// Retrieves a task by its ID from the TaskTb table.
+        /// </summary>
+        /// <param name="id">The ID of the task to retrieve.</param>
+        /// <returns>The task with the specified ID, or a NotFound status if not found.</returns>
         [HttpGet("{id}")]
-
         public async Task<ActionResult<TaskTb>> GetTaskById(int id)
         {
             // it is retrive the data from database by Id
@@ -60,7 +66,8 @@ namespace TaskMgtWebAPI.Controllers
                 // If the project is not found, return a NotFound response.
                 if (TaskTb == null)
                 {
-                    return NotFound();
+                    _logger.LogWarning("Task with ID {Id} not found.", id);
+                    return NotFound($"Task with ID {id} not found");
                 }
                 return Ok(TaskTb);
 
@@ -71,31 +78,38 @@ namespace TaskMgtWebAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Updates an existing task in the TaskTb table.
+        /// </summary>
+        /// <param name="id">The ID of the task to update.</param>
+        /// <param name="TaskDTO">The task data transfer object containing updated task details.</param>
+        /// <returns>Returns NoContent status if the update is successful, or an error message if the update fails.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, TaskDTO TaskDTO)
         {
-            if (id != TaskDTO.UserId)
+            if (id != TaskDTO.TaskId)
             {
                 return BadRequest();
             }
 
             TaskTb taskTb = new TaskTb()
             {
-                 TaskId=TaskDTO.TaskId,
-                 Description=TaskDTO.Description,
-                 UserId=TaskDTO.UserId,
-                 DueDate=TaskDTO.DueDate,
-                 Priority=TaskDTO.Priority,
-                 ProjectId=TaskDTO.ProjectId,
-                 Status=TaskDTO.Status,
-                 Title=TaskDTO.Title
+                TaskId = TaskDTO.TaskId,
+                Description = TaskDTO.Description,
+                UserId = TaskDTO.UserId,
+                DueDate = TaskDTO.DueDate,
+                Priority = TaskDTO.Priority,
+                ProjectId = TaskDTO.ProjectId,
+                Status = TaskDTO.Status,
+                Title = TaskDTO.Title
             };
 
 
             _context.Entry(taskTb).State = EntityState.Modified;
             try
             {
+                _logger.LogInformation("Updating task with TaskId: {TaskId}", taskTb.TaskId);
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -117,8 +131,11 @@ namespace TaskMgtWebAPI.Controllers
             return _context.TaskTb.Any(e => e.TaskId == id);
         }
 
-
-
+        /// <summary>
+        /// Creates a new task in the TaskTb table.
+        /// </summary>
+        /// <param name="TaskDTO">The task data transfer object containing task details.</param>
+        /// <returns>The newly created task if successful.</returns>
         [HttpPost]
         //Method to create a new ProjectTb record in the database
         public async Task<ActionResult<TaskTb>> CreateTask(TaskDTO TaskDTO)
@@ -138,7 +155,8 @@ namespace TaskMgtWebAPI.Controllers
 
             try
             {
-                _logger.LogInformation(" created a request as per the id ");
+                _logger.LogInformation("Creating task with Title: {Title} and TaskId: {TaskId}", taskTb.Title, taskTb.TaskId);
+
                 // Add the new project entity to the ProjectTb table in the database context.
                 _context.TaskTb.Add(taskTb);
 
@@ -147,7 +165,7 @@ namespace TaskMgtWebAPI.Controllers
 
 
                 // It returns the created project entity
-                return CreatedAtAction("GetTasks", new { id = taskTb.TaskId }, taskTb);
+                return CreatedAtAction("GetTaskById", new { id = taskTb.TaskId }, taskTb);
                 //GetProjectTb is there instaed of GetProjectById
             }
             catch (Exception ex)
@@ -161,6 +179,11 @@ namespace TaskMgtWebAPI.Controllers
         }
 
 
+        /// <summary>
+        /// Deletes a task by its ID from the TaskTb table.
+        /// </summary>
+        /// <param name="id">The ID of the task to delete.</param>
+        /// <returns>NoContent if the deletion is successful, or an error message if something goes wrong.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTask(int id)
         {
@@ -168,11 +191,11 @@ namespace TaskMgtWebAPI.Controllers
             {
                 // Attempt to find the project by ID
                 var taskTb = await _context.TaskTb.FindAsync(id);
-
+                _logger.LogInformation("Deleting task with TaskId: {TaskId}", id);
                 // Return 404 if the project was not found
                 if (taskTb == null)
                 {
-                    return NotFound("The project with the specified ID was not found.");
+                    return NotFound("The task with the specified ID was not found.");
                 }
 
                 // Removing the project from the database

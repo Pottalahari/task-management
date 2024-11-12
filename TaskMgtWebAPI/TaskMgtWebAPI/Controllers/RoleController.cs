@@ -1,15 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.EntityFrameworkCore;
 using TaskMgtWebAPI.DTOS;
 using TaskMgtWebAPI.Models;
-
-using TaskMgtWebAPI.DTOS;
-using TaskMgtWebAPI.Models;
-using Microsoft.EntityFrameworkCore;
-
-
 namespace TaskMgtWebAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -17,10 +10,6 @@ namespace TaskMgtWebAPI.Controllers
     public class RoleController : ControllerBase
     {
         private readonly TaskMgtDBContext _context;
-
-        private readonly ILogger<ProjectController> _logger;
-        public RoleController(TaskMgtDBContext context, ILogger<ProjectController> logger)
-
         //property for logger
         private readonly ILogger<RoleController> _logger;
 
@@ -100,22 +89,6 @@ namespace TaskMgtWebAPI.Controllers
         {
             return _context.RoleTb.Any(e => e.RoleId == role);
         }
-
-
-        public async Task<ActionResult<IEnumerable<RoleTb>>> GetRoles()
-        {
-
-        }
-        public async Task<ActionResult<RoleTb>> GetRoleById(int id)
-        {
-
-        }
-        public async Task<ActionResult<ProjectTb>> CreateRole(RoleDTO roleDTO)
-        {
-
-        }
-
-
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRole(int id, RoleDTO roleDTO)
         {
@@ -185,23 +158,6 @@ namespace TaskMgtWebAPI.Controllers
                 // Return a 500 Internal Server Error if something goes wrong
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while attempting to delete the project.");
             }
-        }
-    }
-}
-
-
-
-            return NoContent();
-
-        }
-
-        private bool RoleTbExists(int id)
-        {
-            return _context.RoleTb.Any(e => e.RoleId == id);
-        }
-        public async Task<IActionResult> DeleteRole(int id)
-        {
-
         }
     }
 }
