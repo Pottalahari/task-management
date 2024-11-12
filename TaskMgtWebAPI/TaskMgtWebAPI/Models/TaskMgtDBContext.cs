@@ -19,8 +19,6 @@ namespace TaskMgtWebAPI.Models
 
        => optionsBuilder.UseSqlServer("Data Source=CHINNULAHARI\\SQLEXPRESS;Initial Catalog=TaskMgtDB;Integrated Security=True;TrustServerCertificate=True");
 
-       => optionsBuilder.UseSqlServer("Data Source=Maha\\SQLEXPRESS;Initial Catalog=TaskMgtDB;Integrated Security=True;TrustServerCertificate=True");
-
 
     }
 }

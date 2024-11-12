@@ -12,7 +12,6 @@ namespace TaskMgtWebAPI.Controllers
         private readonly TaskMgtDBContext _context;
         //property for logger
         private readonly ILogger<RoleController> _logger;
-
         public RoleController(TaskMgtDBContext context, ILogger<RoleController> logger)
 
         {
@@ -109,10 +108,7 @@ namespace TaskMgtWebAPI.Controllers
 
             try
             {
-
-
                 _logger.LogInformation("Data is updated successfully");
-
                 // It saves the changes in the database
                 await _context.SaveChangesAsync();
             }
@@ -127,9 +123,7 @@ namespace TaskMgtWebAPI.Controllers
                     throw;
                 }
             }
-
             return NoContent();
-
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
@@ -154,7 +148,6 @@ namespace TaskMgtWebAPI.Controllers
             }
             catch (Exception ex)
             {
-
                 // Return a 500 Internal Server Error if something goes wrong
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while attempting to delete the project.");
             }
