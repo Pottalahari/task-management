@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using TaskMgtWebAPI.Models;
-using TaskMgtWebAPI.Services;
+//using TaskMgtWebAPI.Services;
 
 namespace TaskMgtWebAPI
 {
@@ -37,7 +37,7 @@ namespace TaskMgtWebAPI
                           .WithMethods("GET", "POST", "PATCH", "PUT") // Allow all HTTP methods, including PATCH
                 );
             });
-            builder.Services.AddHostedService<DeadlineNotificationService>();
+            //builder.Services.AddHostedService<DeadlineNotificationService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline
