@@ -15,6 +15,7 @@ namespace TaskMgtWebAPI.DTOS
 
         [ForeignKey("UserId")]
         public int UserId { get; set; }
+
         [ForeignKey("ProjectId")]
         public int ProjectId { get; set; }
     }

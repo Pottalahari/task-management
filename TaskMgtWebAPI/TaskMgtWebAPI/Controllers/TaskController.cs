@@ -312,29 +312,34 @@ namespace TaskMgtWebAPI.Controllers
 
             return NoContent(); // 204 No Content response if successful
         }
-        [HttpGet("groupedByProject")]
-        public async Task<IActionResult> GetTasksGroupedByProject()
+        [HttpGet("getByProject/{projectId}")]
+        public async Task<IActionResult> GetTasksByProject(int projectId)
         {
-            var groupedTasks = await _context.TaskTb
-                .GroupBy(t => t.ProjectId)
-                .Select(group => new
+            // Fetch tasks for the specified project ID
+            var projectTasks = await _context.TaskTb
+                .Where(t => t.ProjectId == projectId) // Filter by ProjectId
+                .Select(task => new
                 {
-                    ProjectId = group.Key,
-                    Tasks = group.Select(task => new
-                    {
-                        task.TaskId,
-                        task.Title,
-                        task.Description,
-                        task.DueDate,
-                        task.Priority,
-                        task.Status,
-                        task.UserId
-                    }).ToList()
+                    task.TaskId,
+                    task.Title,
+                    task.Description,
+                    task.DueDate,
+                    task.Priority,
+                    task.Status,
+                    task.UserId
                 })
                 .ToListAsync();
 
-            return Ok(groupedTasks);
+            // Check if tasks exist for the given project ID
+            if (projectTasks == null || projectTasks.Count == 0)
+            {
+                return NotFound(new { Message = $"No tasks found for Project ID: {projectId}" });
+            }
+
+            // Return the tasks as a response
+            return Ok(projectTasks);
         }
+
 
     }
 }
