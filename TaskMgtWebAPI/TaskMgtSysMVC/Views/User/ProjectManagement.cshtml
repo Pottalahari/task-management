@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewBag.Title = "ProjectManagement";
+}
+
+﻿
+@{
+    ViewBag.Title = "ProjecManagement";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Tasks by Project ID</title>
+</head>
+<body>
+    <h1>Fetch Tasks by Project ID</h1>
+
+    <!-- Input field for project ID -->
+    <label for="projectId">Enter Project ID:</label>
+    <input type="text" id="projectId" name="projectId" placeholder="Enter project ID">
+    <button type="button" onclick="fetchTasksByProjectId()">Fetch Tasks</button>
+
+    <!-- Div to display tasks -->
+    <div id="tasksForProject"></div>
+
+    <script>
+        const apiUrl = 'https://localhost:7243/api/Task/getByProject'; // Adjust endpoint to match your API
+
+        // Function to fetch tasks by Project ID
+        function fetchTasksByProjectId() {
+            const projectId = document.getElementById("projectId").value.trim();
+
+            // Validate input
+            if (!projectId) {
+                document.getElementById("tasksForProject").innerHTML =
+                    `<p style="color: red;">Please enter a valid Project ID.</p>`;
+                return;
+            }
+
+            const fetchUrl = `${apiUrl}/${projectId}`; // Construct URL with project ID
+
+            fetch(fetchUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch tasks for Project ID: ${projectId}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayTasksForProject(data, projectId);
+                })
+                .catch(error => {
+                    console.error('Error fetching tasks:', error.message);
+                    document.getElementById("tasksForProject").innerHTML =
+                        `<p style="color: red;">Error: ${error.message}</p>`;
+                });
+        }
+
+        // Function to display tasks on the page
+        function displayTasksForProject(tasks, projectId) {
+            const tasksDiv = document.getElementById("tasksForProject");
+            tasksDiv.innerHTML = "";
+
+            if (!Array.isArray(tasks) || tasks.length === 0) {
+                tasksDiv.innerHTML = `<p>No tasks found for Project ID: ${projectId}</p>`;
+                return;
+            }
+
+            const projectHeader = document.createElement("h2");
+            projectHeader.textContent = `Tasks for Project ID: ${projectId}`;
+            tasksDiv.appendChild(projectHeader);
+
+            const taskList = document.createElement("ul");
+            tasks.forEach(task => {
+                const taskItem = document.createElement("li");
+                taskItem.textContent = `
+            Task ID: ${task.taskId},
+            Title: ${task.title},
+            Description: ${task.description},
+            Due Date: ${task.dueDate},
+            Priority: ${task.priority},
+            Status: ${task.status}
+        `;
+                taskList.appendChild(taskItem);
+            });
+
+            tasksDiv.appendChild(taskList);
+        }
+
+    </script>
+</body>
+</html>

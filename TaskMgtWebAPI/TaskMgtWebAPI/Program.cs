@@ -34,6 +34,7 @@ namespace TaskMgtWebAPI
                 options.AddPolicy("AllowAll", policy =>
                     policy.AllowAnyOrigin()
                           .AllowAnyHeader()
+                          //.AllowAnyMethod()
                           .WithMethods("GET", "POST", "PATCH", "PUT") // Allow all HTTP methods, including PATCH
                 );
             });

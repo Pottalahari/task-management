@@ -1,0 +1,517 @@
+﻿@*@{
+        ViewBag.Title = "Task";
+    }
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Task Management</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: url('https://source.unsplash.com/1920x1080/?technology,office') no-repeat center center fixed;
+                background-size: cover;
+                margin: 0;
+                padding: 0;
+                color: #333;
+            }
+
+            h1, h2 {
+                text-align: center;
+                color: #0056b3;
+                margin-bottom: 20px;
+            }
+
+            form {
+                width: 60%;
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 8px;
+                padding: 30px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: bold;
+                color: #0056b3;
+            }
+
+            input, select {
+                width: calc(100% - 20px);
+                padding: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            }
+
+            button {
+                width: 40%;
+                padding: 10px;
+                background-color: #0056b3;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                cursor: pointer;
+                display: block;
+                margin: 0 auto;
+            }
+
+                button:hover {
+                    background-color: #003f7d;
+                }
+
+            #taskList {
+                margin: 20px auto;
+                width: 70%;
+                background: rgba(255, 255, 255, 0.9);
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            #responseMessage {
+                display: block;
+                text-align: center;
+                margin: 10px auto;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            .form-group {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+                .form-group label {
+                    flex: 1;
+                    text-align: justify;
+                    margin-right: 10px;
+                }
+
+                .form-group input,
+                .form-group select {
+                    flex: 2;
+                }
+        </style>
+    </head>
+    <body>
+        <h1>Task Management</h1>
+        <form id="taskForm">
+            <div class="form-group">
+                <label for="taskId">Task Id:</label>
+                <input type="number" id="taskId">
+            </div>
+
+            <div class="form-group">
+                <label for="title">Title:</label>
+                <input type="text" id="title">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <input type="text" id="description">
+            </div>
+
+            <div class="form-group">
+                <label for="date">Due Date:</label>
+                <input type="date" id="date">
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority:</label>
+                <select id="priority">
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status">
+                    <option value="Not Started">Not Started</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="userId">User Id:</label>
+                <input type="number" id="userId">
+            </div>
+
+            <div class="form-group">
+                <label for="projectId">Project Id:</label>
+                <input type="number" id="projectId">
+            </div>
+
+            <button type="button" onclick="createTask()">Assign Task</button>
+
+        </form>
+
+        <label id="responseMessage"></label>
+
+        <h2>View All Tasks</h2>
+        <button type="button" onclick="fetchAllTasks()">Get All Tasks</button>
+        <div id="taskList"></div>
+
+        <script>
+            const apiUrl = 'https://localhost:7243/api/Task';  // Task API endpoint
+            const userApiUrl = 'https://localhost:7243/api/User';  // User API endpoint for validation
+
+            // Function to display messages on the page
+            function displayMessage(message, isError = false) {
+                const responseLabel = document.getElementById("responseMessage");
+                responseLabel.style.color = isError ? "red" : "green";
+                responseLabel.textContent = message;
+            }
+
+            // Assign Task function that validates User Id and then creates the task
+            function assignTask() {
+                const userId = document.getElementById("userId").value;
+                if (!userId) {
+                    return displayMessage("Please enter User Id to validate", true);
+                }
+
+                // Check if the user exists
+                fetch(`${userApiUrl}/${userId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`User with ID ${userId} not found`);
+                        }
+                        return response.json();
+                    })
+                    .then(user => {
+                        // If user exists, create the task
+                        createTask();
+                    })
+                    .catch(error => displayMessage(`Error: ${error.message}`, true));
+            }
+
+            // Create a new task (POST)
+            function createTask() {
+                const data = getFormData();
+
+                // Ensure all required fields are populated
+                if (!data.title || !data.status || !data.priority || !data.description) {
+                    return displayMessage("Please fill in all required fields: Title, Status, Priority, and Description", true);
+                }
+
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(errorData => {
+                                // Display detailed validation error messages
+                                const errorMessages = Object.entries(errorData.errors)
+                                    .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+                                    .join("\n");
+                                displayMessage(`Validation Errors:\n${errorMessages}`, true);
+                                throw new Error(errorMessages);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(() => {
+                        displayMessage('Task assigned successfully');
+                        fetchAllTasks(); // Refresh the task list after assignment
+                    })
+                    .catch(error => displayMessage(`Error: ${error.message}`, true));
+            }
+
+            // Helper function to get form data in a flat structure
+            function getFormData() {
+                return {
+                    taskId: document.getElementById("taskId").value ? parseInt(document.getElementById("taskId").value) : null,
+                    title: document.getElementById("title").value.trim(),
+                    description: document.getElementById("description").value.trim(),
+                    dueDate: document.getElementById("date").value,
+                    priority: document.getElementById("priority").value,
+                    status: document.getElementById("status").value,
+                    userId: parseInt(document.getElementById("userId").value),
+                    projectId: parseInt(document.getElementById("projectId").value)
+                };
+            }
+
+            // Function to display tasks in the taskList div
+            function fetchAllTasks() {
+                fetch(apiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(tasks => displayTasks(tasks))
+                    .catch(error => displayMessage(`Error: ${error.message}`, true));
+            }
+
+            // Function to display tasks in the taskList div
+            function displayTasks(tasks) {
+                const taskList = document.getElementById("taskList");
+                taskList.innerHTML = tasks.map(task =>
+                    `<p>Id: ${task.taskId}, Title: ${task.title}, Description: ${task.description}, Due Date: ${task.dueDate}, Priority: ${task.priority}, Status: ${task.status}, User Id: ${task.userId}, Project Id: ${task.projectId}</p>`
+                ).join('');
+            }
+        </script>
+    </body>
+    </html>*@
+@{
+    ViewBag.Title = "Task";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Task</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://source.unsplash.com/1920x1080/?technology,office') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 20px;
+        }
+
+        form {
+            width: 60%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #0056b3;
+        }
+
+        input, select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 40%;
+            padding: 10px;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+
+            button:hover {
+                background-color: #003f7d;
+            }
+
+        #responseMessage {
+            display: block;
+            text-align: center;
+            margin: 10px auto;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .form-group label {
+                flex: 1;
+                text-align: justify;
+                margin-right: 10px;
+            }
+
+            .form-group input,
+            .form-group select {
+                flex: 2;
+            }
+    </style>
+</head>
+<body>
+    <h1>Assign Task</h1>
+    <form id="taskForm">
+        <div class="form-group">
+            <label for="taskId">Task Id:</label>
+            <input type="number" id="taskId">
+        </div>
+
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <input type="text" id="description">
+        </div>
+
+        <div class="form-group">
+            <label for="date">Due Date:</label>
+            <input type="date" id="date">
+        </div>
+
+        <div class="form-group">
+            <label for="priority">Priority:</label>
+            <select id="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <select id="status">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="userId">User Id:</label>
+            <input type="number" id="userId">
+        </div>
+
+        <div class="form-group">
+            <label for="projectId">Project Id:</label>
+            <input type="number" id="projectId">
+        </div>
+
+        <button type="button" onclick="assignTask()">Assign Task</button>
+    </form>
+
+    <label id="responseMessage"></label>
+
+    <script>
+        const apiUrl = 'https://localhost:7243/api/Task';  // Task API endpoint
+        const userApiUrl = 'https://localhost:7243/api/User';  // User API endpoint for validation
+
+        // Function to display messages on the page
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        // Assign Task function that validates User Id and then creates the task
+        function assignTask() {
+            const userId = document.getElementById("userId").value;
+            if (!userId) {
+                return displayMessage("Please enter User Id to validate", true);
+            }
+
+            // Check if the user exists
+            fetch(`${userApiUrl}/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`User with ID ${userId} not found`);
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    // If user exists, create the task
+                    createTask();
+                })
+                .catch(error => displayMessage(`Error: ${error.message}`, true));
+        }
+
+        // Create a new task (POST)
+        function createTask() {
+            const data = getFormData();
+
+            // Ensure all required fields are populated
+            if (!data.title || !data.status || !data.priority || !data.description) {
+                return displayMessage("Please fill in all required fields: Title, Status, Priority, and Description", true);
+            }
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            // Display detailed validation error messages
+                            const errorMessages = Object.entries(errorData.errors)
+                                .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+                                .join("\n");
+                            displayMessage(`Validation Errors:\n${errorMessages}`, true);
+                            throw new Error(errorMessages);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(() => displayMessage('Task assigned successfully'))
+                .catch(error => displayMessage(`Error: ${error.message}`, true));
+        }
+
+        // Helper function to get form data in a flat structure
+        function getFormData() {
+            return {
+                taskId: document.getElementById("taskId").value ? parseInt(document.getElementById("taskId").value) : null,
+                title: document.getElementById("title").value.trim(),
+                description: document.getElementById("description").value.trim(),
+                dueDate: document.getElementById("date").value,
+                priority: document.getElementById("priority").value,
+                status: document.getElementById("status").value,
+                userId: parseInt(document.getElementById("userId").value),
+                projectId: parseInt(document.getElementById("projectId").value)
+            };
+        }
+    </script>
+</body>
+</html>
+
+
+

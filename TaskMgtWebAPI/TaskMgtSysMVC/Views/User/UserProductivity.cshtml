@@ -1,0 +1,63 @@
+﻿
+@{
+    ViewBag.Title = "UserProductivity";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download User Productivity Report</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Download User Productivity Report</h2>
+    <label for="userId">Enter User ID: </label>
+    <input type="number" id="userId" placeholder="Enter User ID">
+    <button id="downloadReport">Download Report</button>
+
+    <script>
+        $(document).ready(function () {
+            $('#downloadReport').click(function () {
+                const userId = $('#userId').val();
+
+                if (!userId) {
+                    alert('Please enter a User ID.');
+                    return;
+                }
+
+                // AJAX call to download the report
+                $.ajax({
+                    url: `https://localhost:7243/api/Task/UserProductivityReport/${userId}`,
+                    method: 'GET',
+                    xhrFields: {
+                        responseType: 'blob' // Set response type as blob to handle file download
+                    },
+                    success: function (data, status, xhr) {
+                        // Extract filename from Content-Disposition header
+                        const disposition = xhr.getResponseHeader('Content-Disposition');
+                        const match = disposition && disposition.match(/filename="?(.+)"?/);
+                        const fileName = match ? match[1] : `User_${userId}_Productivity_Report.txt`;
+
+                        // Create a blob URL and trigger the download
+                        const url = window.URL.createObjectURL(new Blob([data]));
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = fileName;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    },
+                    error: function (xhr) {
+                        const errorMessage = xhr.responseJSON?.Message || 'An error occurred.';
+                        alert(errorMessage);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+

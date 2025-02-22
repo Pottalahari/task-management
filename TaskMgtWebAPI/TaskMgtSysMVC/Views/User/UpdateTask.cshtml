@@ -1,0 +1,279 @@
+﻿
+@{
+    ViewBag.Title = "UpdateTask";
+}
+
+
+﻿
+@{
+    ViewBag.Title = "UpdateTask";
+}
+
+@*<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Update Task Status</title>
+    </head>
+    <body>
+        <h3>Update Task Status</h3>
+        <form id="updateStatusForm">
+            <label for="updateTaskId">Task Id: </label>
+            <input type="number" id="updateTaskId" placeholder="Enter Task ID">
+            <br /><br />
+
+            <label for="newStatus">New Status: </label>
+            <select id="newStatus">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+            <br /><br />
+
+            <button type="button" onclick="updateTaskStatus()">Update Status</button>
+        </form>
+
+        <label id="responseMessage" style="color:green"></label>
+
+        <script>
+            const apiUrl = 'https://localhost:7243/api/Task'; // Base API URL
+
+            // Display success or error messages
+            function displayMessage(message, isError = false) {
+                const responseLabel = document.getElementById("responseMessage");
+                responseLabel.style.color = isError ? "red" : "green";
+                responseLabel.textContent = message;
+            }
+
+            // Update task status
+            function updateTaskStatus() {
+                const taskId = document.getElementById("updateTaskId").value;
+                const newStatus = document.getElementById("newStatus").value;
+
+                if (!taskId) return displayMessage("Please enter Task Id to update status", true);
+                if (!newStatus) return displayMessage("Please select a status to update", true);
+
+                fetch(`${apiUrl}/${taskId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })  // Ensure 'status' matches the expected property name
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                displayMessage(`Error: ${text}`, true);
+                                console.error("Server Error:", text);
+                                throw new Error(`Request failed with status ${response.status}`);
+                            });
+                        }
+                        displayMessage(`Task status updated to "${newStatus}"`);
+                    })
+                    .catch(error => {
+                        displayMessage(`Error: ${error.message}`, true);
+                        console.error("Fetch Error:", error);
+                    });
+            }
+        </script>
+    </body>
+    </html>*@
+
+@*<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Update Task Status</title>
+    </head>
+    <body>
+        <h3>Update Task Status</h3>
+        <form id="updateStatusForm">
+            <label for="updateTaskId">Task Id: </label>
+            <input type="number" id="updateTaskId" placeholder="Enter Task ID">
+            <br /><br />
+
+            <label for="newStatus">New Status: </label>
+            <select id="newStatus">
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+            <br /><br />
+
+            <label for="priority">Priority: </label>
+            <select id="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <br /><br />
+
+            <label for="dueDate">Due Date: </label>
+            <input type="date" id="dueDate">
+            <br /><br />
+
+            <button type="button" onclick="updateTaskStatus()">Update Task</button>
+        </form>
+
+        <label id="responseMessage" style="color:green"></label>
+
+        <script>
+            const apiUrl = 'https://localhost:7243/api/Task'; // Base API URL
+
+            // Display success or error messages
+            function displayMessage(message, isError = false) {
+                const responseLabel = document.getElementById("responseMessage");
+                responseLabel.style.color = isError ? "red" : "green";
+                responseLabel.textContent = message;
+            }
+
+            // Update task status
+            function updateTaskStatus() {
+                const taskId = document.getElementById("updateTaskId").value;
+                const newStatus = document.getElementById("newStatus").value;
+                const priority = document.getElementById("priority").value;
+                const dueDate = document.getElementById("dueDate").value;
+
+                if (!taskId) return displayMessage("Please enter Task Id to update status", true);
+                if (!newStatus) return displayMessage("Please select a status to update", true);
+                if (!priority) return displayMessage("Please select a priority", true);
+                if (!dueDate) return displayMessage("Please select a due date", true);
+
+                // Prepare the data for the PATCH request
+                const requestData = {
+                    status: newStatus,
+                    priority: priority,
+                    dueDate: dueDate
+                };
+
+                fetch(`${apiUrl}/${taskId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)  // Sending priority and dueDate along with status
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                displayMessage(`Error: ${text}`, true);
+                                console.error("Server Error:", text);
+                                throw new Error(`Request failed with status ${response.status}`);
+                            });
+                        }
+                        displayMessage(`Task updated successfully`);
+                    })
+                    .catch(error => {
+                        displayMessage(`Error: ${error.message}`, true);
+                        console.error("Fetch Error:", error);
+                    });
+            }
+        </script>
+    </body>
+    </html>*@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Task Status</title>
+</head>
+<body>
+    <h3>Update Task Status</h3>
+    <form id="updateStatusForm">
+        <label for="updateTaskId">Task Id: </label>
+        <input type="number" id="updateTaskId" placeholder="Enter Task ID">
+        <br /><br />
+
+        <label for="newStatus">New Status: </label>
+        <select id="newStatus">
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+        </select>
+        <br /><br />
+
+        <label for="priority">Priority: </label>
+        <select id="priority">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </select>
+        <br /><br />
+
+        <label for="dueDate">Due Date: </label>
+        <input type="date" id="dueDate">
+        <br /><br />
+
+        <button type="button" onclick="updateTaskStatus()">Update Task</button>
+    </form>
+
+    <label id="responseMessage" style="color:green"></label>
+
+    <script>
+        const apiUrl = 'https://localhost:7243/api/Task'; // Base API URL
+
+        // Display success or error messages
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        // Update task status
+        function updateTaskStatus() {
+            const taskId = document.getElementById("updateTaskId").value;
+            const newStatus = document.getElementById("newStatus").value;
+            const priority = document.getElementById("priority").value;
+            const dueDate = document.getElementById("dueDate").value;
+
+            if (!taskId) return displayMessage("Please enter Task Id to update status", true);
+            if (!newStatus) return displayMessage("Please select a status to update", true);
+            if (!priority) return displayMessage("Please select a priority", true);
+            if (!dueDate) return displayMessage("Please select a due date", true);
+
+            // Check if the due date is within the next 24 hours
+            const dueDateTime = new Date(dueDate);
+            const now = new Date();
+            const hoursToDueDate = (dueDateTime - now) / (1000 * 60 * 60);
+            if (hoursToDueDate <= 24 && hoursToDueDate > 0) {
+                alert("This task is due within the next 24 hours. Please prioritize it!");
+            }
+
+            // Prepare the data for the PATCH request
+            const requestData = {
+                status: newStatus,
+                priority: priority,
+                dueDate: dueDate
+            };
+
+            fetch(`${apiUrl}/${taskId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)  // Sending priority and dueDate along with status
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            displayMessage(`Error: ${text}`, true);
+                            console.error("Server Error:", text);
+                            throw new Error(`Request failed with status ${response.status}`);
+                        });
+                    }
+                    displayMessage(`Task updated successfully`);
+                })
+                .catch(error => {
+                    displayMessage(`Error: ${error.message}`, true);
+                    console.error("Fetch Error:", error);
+                });
+        }
+    </script>
+</body>
+</html>
+
+
